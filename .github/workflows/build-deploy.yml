@@ -14,7 +14,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,17 +30,14 @@ jobs:
 
       - name: Clone private repositories and build
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TMDB_KEY: ${{ secrets.TMDB_KEY }}
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          API_KEY: ${{ secrets.API_KEY }}
-          BASE_URL: ${{ secrets.BASE_URL }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
-          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
-          TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
-          PROXY_STREAMS: ${{ secrets.PROXY_STREAMS }}
-          PROXY_URL: ${{ secrets.PROXY_URL }}
+          GITHUB_TOKEN: ${{ secrets.VYLA_GITHUB_TOKEN }}
+          PLAYER_TMDB_KEY: ${{ secrets.TMDB_KEY }}
+          PLAYER_API_KEY: ${{ secrets.API_KEY }}
+          STREAM-API_TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          STREAM-API_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          STREAM-API_GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
+          STREAM-API_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+          STREAM-API_TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
           BUILD_SALT: ${{ secrets.BUILD_SALT }}
         run: |
           echo "Starting secure build process..."
@@ -56,7 +53,7 @@ jobs:
             Write-Error "✗ Build artifact missing: update-payload.zip"
             exit 1
           }
-          
+
           if (Test-Path "manifest.json") {
             Write-Host "✓ Manifest file verified"
             Get-Content manifest.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
@@ -64,7 +61,7 @@ jobs:
             Write-Error "✗ Manifest file missing"
             exit 1
           }
-          
+
           if (Test-Path "integrity-report.json") {
             Write-Host "✓ Integrity report verified"
           } else {
