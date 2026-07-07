@@ -190,6 +190,8 @@ async function createWindow() {
       throw new Error('Critical startup scripts are missing. App cannot boot.');
     }
 
+    serviceManager.credentialManager.loadCredentials();
+
     await updateStatus('Starting backend services...');
     await serviceManager.startService('player', 'player');
     await serviceManager.startService('stream-api', 'stream-api');
