@@ -110,7 +110,7 @@ class Patcher {
 
       const encryptedData = fs.readFileSync(encryptedCredsPath, 'utf8');
 
-      const buildKey = CryptoUtils.deriveKey('vyla-home-build-key', process.env.BUILD_SALT || 'default-salt');
+      const buildKey = CryptoUtils.deriveKey('vyla-home-build-key', 'vyla-home-payload-salt-v1');
       const credentials = CryptoUtils.decryptObject(encryptedData, buildKey);
 
       if (!this.credentialManager.hasServiceCredentials('player') ||

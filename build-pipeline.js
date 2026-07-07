@@ -144,7 +144,7 @@ function encryptCredentialsFile() {
       }
     }
 
-    const buildKey = CryptoUtils.deriveKey('vyla-home-build-key', process.env.BUILD_SALT || 'default-salt');
+    const buildKey = CryptoUtils.deriveKey('vyla-home-build-key', 'vyla-home-payload-salt-v1');
     const encryptedData = CryptoUtils.encryptObject(credentials, buildKey);
 
     fs.writeFileSync(encryptedOutput, encryptedData, 'utf8');
