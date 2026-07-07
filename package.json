@@ -19,6 +19,9 @@
     "electron-builder": "^26.15.3",
     "javascript-obfuscator": "^4.1.0"
   },
+  "overrides": {
+    "@noble/hashes": "1.5.0"
+  },
   "build": {
     "appId": "com.vyla.home",
     "productName": "Vyla Home",
