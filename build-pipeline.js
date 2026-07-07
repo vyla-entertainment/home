@@ -29,7 +29,7 @@ function clonePrivateRepo(repoConfig, targetDir) {
   const token = getGitHubToken();
   const repoUrl = `https://${token}@github.com/${GITHUB_ORG}/${repoConfig.name}.git`;
 
-  console.log(`[GitHub] Cloning private repository: ${repoConfig.name}`);
+  console.log(`Cloning private repository: ${repoConfig.name}`);
 
   try {
     if (fs.existsSync(targetDir)) {
@@ -41,42 +41,42 @@ function clonePrivateRepo(repoConfig, targetDir) {
       env: { ...process.env, GIT_TERMINAL_PROMPT: '0' }
     });
 
-    console.log(`[GitHub] Successfully cloned: ${repoConfig.name}`);
+    console.log(`Successfully cloned: ${repoConfig.name}`);
   } catch (error) {
     throw new Error(`Failed to clone ${repoConfig.name}: ${error.message}`);
   }
 }
 
 function cloneAllRepos() {
-  console.log('[GitHub] Starting repository clone process...');
+  console.log('Starting repository clone process...');
 
   for (const [key, config] of Object.entries(REPO_CONFIG)) {
     const targetDir = path.join(__dirname, key);
     clonePrivateRepo(config, targetDir);
   }
 
-  console.log('[GitHub] All repositories cloned successfully');
+  console.log('All repositories cloned successfully');
 }
 
 function installDependencies() {
-  console.log('[Build] Installing dependencies for each service...');
+  console.log('Installing dependencies for each service...');
 
   for (const repo of REPOS) {
     const repoDir = path.join(__dirname, repo);
     const pkgJsonPath = path.join(repoDir, 'package.json');
 
     if (!fs.existsSync(pkgJsonPath)) {
-      console.warn(`[Build] No package.json found for ${repo}, skipping npm install`);
+      console.warn(`No package.json found for ${repo}, skipping npm install`);
       continue;
     }
 
-    console.log(`[Build] Running npm install for ${repo}...`);
+    console.log(`Running npm install for ${repo}...`);
     try {
       execSync('npm install --omit=dev', {
         cwd: repoDir,
         stdio: 'inherit'
       });
-      console.log(`[Build] Dependencies installed for ${repo}`);
+      console.log(`Dependencies installed for ${repo}`);
     } catch (error) {
       throw new Error(`npm install failed for ${repo}: ${error.message}`);
     }
@@ -332,7 +332,6 @@ function build() {
     fs.copyFileSync(replacementsConfig, path.join(configDir, 'replacements.json'));
   }
 
-  console.log('[Build] Packaging into update-payload.zip...');
   const zip = new AdmZip();
   for (const repo of REPOS) {
     const destRepo = path.join(BUILD_DIR, repo);
@@ -347,7 +346,6 @@ function build() {
 
   const zipPath = path.join(__dirname, 'update-payload.zip');
   zip.writeZip(zipPath);
-  console.log(`[Build] Completed. Zip archive generated at: ${zipPath}`);
 
   const checksum = validatePayload(zipPath);
 
@@ -365,15 +363,7 @@ function build() {
   };
 
   fs.writeFileSync(path.join(__dirname, 'manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
-  console.log(`[Build] Manifest generated: manifest.json with checksum ${checksum}`);
 
-  console.log('[Build] Generating integrity verification report...');
-  const verifier = new IntegrityVerifier();
-  const integrityReport = verifier.generateIntegrityReport(BUILD_DIR);
-  fs.writeFileSync(path.join(__dirname, 'integrity-report.json'), JSON.stringify(integrityReport, null, 2), 'utf8');
-  console.log('[Build] Integrity report generated: integrity-report.json');
-
-  console.log('[Build] Cleaning up cloned repositories...');
   for (const repo of REPOS) {
     const repoPath = path.join(__dirname, repo);
     if (fs.existsSync(repoPath)) {
@@ -381,7 +371,6 @@ function build() {
     }
   }
 
-  console.log('[Build] Build process completed successfully');
 }
 
 build();
