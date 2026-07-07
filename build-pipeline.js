@@ -175,9 +175,9 @@ function processFolder(src, dest) {
       if (ext === '.js') {
         try {
           obfuscateFile(destPath);
-          console.log(`[Build] Obfuscated: ${path.relative(BUILD_DIR, destPath)}`);
+          console.log(`Obfuscated: ${path.relative(BUILD_DIR, destPath)}`);
         } catch (e) {
-          console.warn(`[Build] Failed to obfuscate: ${destPath}, keeping original.`, e.message);
+          console.warn(`Failed to obfuscate: ${destPath}, keeping original.`, e.message);
         }
       }
     }
@@ -278,7 +278,7 @@ function build() {
   for (const repo of REPOS) {
     const srcRepo = path.join(__dirname, repo);
     if (!fs.existsSync(srcRepo)) {
-      console.error(`[Build] Repository directory missing: ${repo}. Aborting.`);
+      console.error(`Repository directory missing: ${repo}. Aborting.`);
       process.exit(1);
     }
   }
@@ -302,13 +302,13 @@ function build() {
   for (const repo of REPOS) {
     const srcRepo = path.join(__dirname, repo);
     const destRepo = path.join(BUILD_DIR, repo);
-    console.log(`[Build] Processing repository: ${repo}...`);
+    console.log(`Processing repository: ${repo}...`);
     processFolder(srcRepo, destRepo);
 
     const srcModules = path.join(srcRepo, 'node_modules');
     const destModules = path.join(destRepo, 'node_modules');
     if (fs.existsSync(srcModules)) {
-      console.log(`[Build] Copying node_modules for ${repo}...`);
+      console.log(`Copying node_modules for ${repo}...`);
       fs.cpSync(srcModules, destModules, { recursive: true });
     }
   }
