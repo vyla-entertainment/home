@@ -59,6 +59,31 @@ function cloneAllRepos() {
   console.log('[GitHub] All repositories cloned successfully');
 }
 
+function installDependencies() {
+  console.log('[Build] Installing dependencies for each service...');
+
+  for (const repo of REPOS) {
+    const repoDir = path.join(__dirname, repo);
+    const pkgJsonPath = path.join(repoDir, 'package.json');
+
+    if (!fs.existsSync(pkgJsonPath)) {
+      console.warn(`[Build] No package.json found for ${repo}, skipping npm install`);
+      continue;
+    }
+
+    console.log(`[Build] Running npm install for ${repo}...`);
+    try {
+      execSync('npm install --omit=dev', {
+        cwd: repoDir,
+        stdio: 'inherit'
+      });
+      console.log(`[Build] Dependencies installed for ${repo}`);
+    } catch (error) {
+      throw new Error(`npm install failed for ${repo}: ${error.message}`);
+    }
+  }
+}
+
 function cleanBuildDir() {
   if (fs.existsSync(BUILD_DIR)) {
     fs.rmSync(BUILD_DIR, { recursive: true, force: true });
@@ -257,6 +282,13 @@ function build() {
       console.error(`[Build] Repository directory missing: ${repo}. Aborting.`);
       process.exit(1);
     }
+  }
+
+  try {
+    installDependencies();
+  } catch (error) {
+    console.error('[Build] Dependency installation failed:', error.message);
+    process.exit(1);
   }
 
   let encryptedCredentialsPath = null;

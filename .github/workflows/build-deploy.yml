@@ -107,6 +107,8 @@ jobs:
           files: |
             update-payload.zip
             manifest.json
+            dist/*.exe
+            dist/*.exe.blockmap
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

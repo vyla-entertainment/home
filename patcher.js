@@ -99,6 +99,12 @@ class Patcher {
       return;
     }
 
+    if (fs.statSync(encryptedCredsPath).isDirectory()) {
+      console.warn('[Patcher] encrypted-credentials.json path is a stale directory, removing it');
+      fs.rmSync(encryptedCredsPath, { recursive: true, force: true });
+      return;
+    }
+
     try {
       console.log('[Patcher] Processing encrypted credentials from payload...');
 
