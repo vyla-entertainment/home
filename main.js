@@ -328,7 +328,7 @@ button:active {
     }
 
     if (!patcher.verifyExtraction()) {
-      throw new Error('Critical startup scripts are missing. App cannot boot.');
+      throw new Error('No application files found. This usually means update-payload.zip was missing when the app was built, and no update server is reachable. Rebuild with a valid update-payload.zip in the project root, or check your internet connection.');
     }
 
     serviceManager.credentialManager.loadCredentials();
