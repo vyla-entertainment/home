@@ -35,7 +35,6 @@
       "crypto-utils.js",
       "credential-manager.js",
       "update-client.js",
-      "integrity-verifier.js",
       "config/**/*",
       "update-payload.zip",
       "package.json"

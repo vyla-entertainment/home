@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 const AdmZip = require('adm-zip');
 const { execSync } = require('child_process');
-const IntegrityVerifier = require('./integrity-verifier');
 
 const BUILD_DIR = path.join(__dirname, 'dist-build');
 const REPOS = ['frontend', 'player', 'stream-api', 'live-api-streampk'];
