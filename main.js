@@ -12,6 +12,19 @@ let serviceManager;
 let expressApp;
 let expressServer;
 
+const gotLock = app.requestSingleInstanceLock();
+
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
+}
+
 const APPDATA_DIR = path.join(app.getPath('userData'), 'vyla-home-files');
 fs.mkdirSync(APPDATA_DIR, { recursive: true });
 
@@ -209,7 +222,9 @@ async function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow);
+if (gotLock) {
+  app.whenReady().then(createWindow);
+}
 
 app.on('window-all-closed', async () => {
   if (expressServer) expressServer.close();

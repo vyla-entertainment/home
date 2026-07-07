@@ -11,12 +11,13 @@ class ServiceManager {
     this.credentialManager = new CredentialManager(appDataPath);
     this.credentialManager.loadCredentials();
     this.processes = {};
+    this.restartCounts = {};
     this.isStopping = false;
   }
 
   async startService(name, relativeDir, startScript = 'server.js') {
     if (this.processes[name]) {
-      console.log(`[ServiceManager] Service "${name}" is already running.`);
+      console.log(`Service "${name}" is already running.`);
       return;
     }
 
@@ -33,7 +34,7 @@ class ServiceManager {
       ...(this.credentialManager.getServiceCredentials(name) || {})
     };
 
-    console.log(`[ServiceManager] Starting ${name} in ${serviceDir}...`);
+    console.log(`Starting ${name} in ${serviceDir}...`);
 
     const child = spawn(process.execPath, [scriptPath], {
       cwd: serviceDir,
@@ -49,22 +50,27 @@ class ServiceManager {
     };
 
     child.stdout.on('data', (data) => {
-      console.log(`[${name} STDOUT]: ${data.toString().trim()}`);
+      console.log(`${name} STDOUT: ${data.toString().trim()}`);
     });
 
     child.stderr.on('data', (data) => {
-      console.error(`[${name} STDERR]: ${data.toString().trim()}`);
+      console.error(`${name} STDERR: ${data.toString().trim()}`);
     });
 
     child.on('exit', (code, signal) => {
-      console.log(`[ServiceManager] Service "${name}" exited with code ${code}, signal ${signal}`);
+      console.log(`Service "${name}" exited with code ${code}, signal ${signal}`);
       this.processes[name] = null;
 
       if (!this.isStopping) {
-        console.log(`[ServiceManager] Restarting crashed service "${name}" in 3 seconds...`);
+        this.restartCounts[name] = (this.restartCounts[name] || 0) + 1;
+        if (this.restartCounts[name] > 5) {
+          console.error(`Service "${name}" crashed too many times, giving up.`);
+          return;
+        }
+        console.log(`Restarting crashed service "${name}" in 3 seconds...`);
         setTimeout(() => {
           this.startService(name, relativeDir, startScript).catch(err => {
-            console.error(`[ServiceManager] Failed to restart service "${name}":`, err);
+            console.error(`Failed to restart service "${name}":`, err);
           });
         }, 3000);
       }
@@ -76,7 +82,7 @@ class ServiceManager {
     const killPromises = Object.keys(this.processes).map((name) => {
       const procInfo = this.processes[name];
       if (procInfo && procInfo.child) {
-        console.log(`[ServiceManager] Killing service "${name}"`);
+        console.log(`Killing service "${name}"`);
         return new Promise((resolve) => {
           procInfo.child.removeAllListeners('exit');
           procInfo.child.on('exit', () => resolve());
@@ -88,7 +94,7 @@ class ServiceManager {
 
     await Promise.all(killPromises);
     this.processes = {};
-    console.log('[ServiceManager] All services stopped.');
+    console.log('All services stopped.');
   }
 
   async waitForPort(port, timeoutMs = 30000) {
