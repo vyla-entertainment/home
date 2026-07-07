@@ -1,0 +1,40 @@
+{
+  "frontend": [
+    {
+      "find": "https://player.vyla.cc",
+      "replace": "http://localhost:3000"
+    },
+    {
+      "find": "http://player.vyla.cc",
+      "replace": "http://localhost:3000"
+    },
+    {
+      "find": "https://api.vyla.cc",
+      "replace": "http://localhost:7860"
+    },
+    {
+      "find": "https://live.vyla.cc",
+      "replace": "http://localhost:5000"
+    },
+    {
+      "find": "https://missourimonster-x.hf.space",
+      "replace": "http://localhost:7860"
+    },
+    {
+      "find": "https://streamed.pk/api",
+      "replace": "http://localhost:5000"
+    }
+  ],
+  "player": [
+    {
+      "find": "https://live.vyla.cc",
+      "replace": "http://localhost:5000"
+    },
+    {
+      "find": "https://missourimonster-x.hf.space",
+      "replace": "http://localhost:7860"
+    }
+  ],
+  "stream-api": [],
+  "live-api-streampk": []
+}

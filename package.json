@@ -1,0 +1,49 @@
+{
+  "name": "vyla-home",
+  "version": "1.0.0",
+  "description": "Vyla Home Desktop App Launcher",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "build": "node build-pipeline.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "javascript-obfuscator": "^4.1.0",
+    "bytenode": "^1.5.5"
+  },
+  "build": {
+    "appId": "com.vyla.home",
+    "productName": "Vyla Home",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "service-manager.js",
+      "patcher.js",
+      "crypto-utils.js",
+      "credential-manager.js",
+      "update-client.js",
+      "integrity-verifier.js",
+      "config/**/*",
+      "update-payload.zip",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
