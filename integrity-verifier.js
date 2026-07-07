@@ -9,7 +9,7 @@ class IntegrityVerifier {
   }
 
   verifyAppIntegrity(expectedHashes) {
-    console.log('[Integrity] Starting application integrity check...');
+    console.log('Starting application integrity check...');
 
     const results = {
       valid: true,
@@ -24,7 +24,7 @@ class IntegrityVerifier {
       if (!fs.existsSync(fullPath)) {
         results.valid = false;
         results.missingFiles.push(filePath);
-        console.error(`[Integrity] Missing critical file: ${filePath}`);
+        console.error(`Missing critical file: ${filePath}`);
         continue;
       }
 
@@ -32,10 +32,10 @@ class IntegrityVerifier {
       if (actualHash !== expectedHash) {
         results.valid = false;
         results.failedFiles.push({ filePath, expected: expectedHash, actual: actualHash });
-        console.error(`[Integrity] Hash mismatch for ${filePath}`);
+        console.error(`Hash mismatch for ${filePath}`);
       } else {
         results.verifiedFiles.push(filePath);
-        console.log(`[Integrity] Verified: ${filePath}`);
+        console.log(`Verified: ${filePath}`);
       }
     }
 
@@ -90,7 +90,7 @@ class IntegrityVerifier {
         message: isValid ? 'Signature valid' : `Signature invalid: ${result}`
       };
     } catch (error) {
-      console.warn('[Integrity] Signature check failed:', error.message);
+      console.warn('Signature check failed:', error.message);
       return { valid: false, message: error.message };
     }
   }
@@ -105,7 +105,7 @@ class IntegrityVerifier {
   }
 
   performFullVerification(baselineHashes) {
-    console.log('[Integrity] Performing full security verification...');
+    console.log('Performing full security verification...');
 
     const results = {
       appIntegrity: null,
@@ -123,19 +123,19 @@ class IntegrityVerifier {
 
     results.signature = this.verifyWindowsSignature();
     if (!results.signature.valid) {
-      console.warn('[Integrity] Code signature verification failed');
+      console.warn('Code signature verification failed');
     }
 
     results.productionMode = this.verifyProductionMode();
     if (!results.productionMode.valid) {
-      console.warn('[Integrity] Not running in production mode');
+      console.warn('Not running in production mode');
     }
 
     return results;
   }
 
   generateIntegrityReport(buildDir) {
-    console.log('[Integrity] Generating integrity report for build...');
+    console.log('Generating integrity report for build...');
 
     const hashes = this.generateDirectoryHashes(buildDir);
 
