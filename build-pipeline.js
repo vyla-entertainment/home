@@ -341,7 +341,7 @@ function build() {
   zip.addLocalFolder(configDir, 'config');
 
   if (fs.existsSync(path.join(BUILD_DIR, 'encrypted-credentials.json'))) {
-    zip.addLocalFile(path.join(BUILD_DIR, 'encrypted-credentials.json'), 'encrypted-credentials.json');
+    zip.addFile('encrypted-credentials.json', fs.readFileSync(path.join(BUILD_DIR, 'encrypted-credentials.json')));
   }
 
   const zipPath = path.join(__dirname, 'update-payload.zip');

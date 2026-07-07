@@ -149,7 +149,14 @@ class Patcher {
     for (const file of requiredFiles) {
       const fullPath = path.join(this.appDataPath, file);
       if (!fs.existsSync(fullPath)) {
-        console.error(`[Patcher] Extraction verification failed: missing ${file}`);
+        return false;
+      }
+      const stat = fs.statSync(fullPath);
+      if (stat.size === 0) {
+        return false;
+      }
+      const buffer = fs.readFileSync(fullPath);
+      if (buffer.every(byte => byte === 0)) {
         return false;
       }
     }
