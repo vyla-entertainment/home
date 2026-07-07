@@ -39,6 +39,7 @@ async function createWindow() {
     width: 1280,
     height: 800,
     title: 'Vyla Home',
+    icon: path.join(__dirname, 'build', 'icon.ico'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true
@@ -46,50 +47,97 @@ async function createWindow() {
   });
 
   mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(`
-    <html>
-      <head>
-        <title>Vyla Home</title>
-        <style>
-          body {
-            background: #000000;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-          }
-          .loader {
-            text-align: center;
-          }
-          .spinner {
-            border: 2px solid rgba(255,255,255,0.1);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border-left-color: #ffffff;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-          }
-          #status {
-            font-size: 13px;
-            color: #888888;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-          }
-          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        </style>
-      </head>
-      <body>
-        <div class="loader">
-          <div class="spinner"></div>
-          <div id="status">Connecting...</div>
-        </div>
-      </body>
-    </html>
-  `));
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vyla Home</title>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  user-select: none;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner circle {
+  fill: none;
+  stroke: rgba(255,255,255,.95);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+#status {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,.55);
+  letter-spacing: -.01em;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1,200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90,200;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90,200;
+    stroke-dashoffset: -124;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="loader">
+  <svg class="spinner" viewBox="25 25 50 50" aria-hidden="true">
+    <circle cx="50" cy="50" r="20"></circle>
+  </svg>
+  <div id="status">Starting…</div>
+</div>
+
+</body>
+</html>
+`));
 
   const patcher = new Patcher(APPDATA_DIR);
   serviceManager = new ServiceManager(APPDATA_DIR, envConfig);
@@ -103,12 +151,105 @@ async function createWindow() {
 
   const handleFatalError = (errMessage) => {
     mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(`
-      <body style="background:#111;color:#f33;font-family:sans-serif;padding:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;">
-        <h2 style="margin-bottom:10px;">Startup Failure</h2>
-        <p style="color:#aaa;max-width:600px;text-align:center;margin-bottom:20px;">${errMessage}</p>
-        <button onclick="window.location.reload()" style="background:#f33;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-weight:bold;">Retry Boot</button>
-      </body>
-    `));
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Startup Error</title>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.container {
+  max-width: 480px;
+  text-align: center;
+}
+
+.icon {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 22px;
+  color: #ff453a;
+}
+
+h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+p {
+  margin: 14px 0 28px;
+  color: rgba(255,255,255,.55);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #000;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity .2s ease;
+}
+
+button:hover {
+  opacity: .82;
+}
+
+button:active {
+  opacity: .65;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="7" x2="12" y2="13"/>
+    <circle cx="12" cy="17" r="1"/>
+  </svg>
+
+  <h1>Couldn't start Vyla Home</h1>
+
+  <p>${errMessage}</p>
+
+  <button onclick="location.reload()">
+    Try Again
+  </button>
+</div>
+
+</body>
+</html>
+`));
   };
 
   try {
