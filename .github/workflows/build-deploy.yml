@@ -15,6 +15,8 @@ on:
       - 'crypto-utils.js'
       - 'update-client.js'
       - '.github/workflows/build-deploy.yml'
+  schedule:
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -36,22 +38,71 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Restore last-known commit SHAs
+        id: cache-shas
+        uses: actions/cache@v4
+        with:
+          path: last-shas.json
+          key: vyla-home-last-shas
+
+      - name: Check for upstream changes
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.VYLA_GITHUB_TOKEN }}
+        run: |
+          $repos = @('frontend', 'player', 'stream-api', 'live-api-streampk')
+          $last = @{}
+          if (Test-Path "last-shas.json") {
+            $last = Get-Content last-shas.json | ConvertFrom-Json -AsHashtable
+          }
+
+          $current = @{}
+          $changed = $false
+
+          foreach ($repo in $repos) {
+            $uri = "https://api.github.com/repos/vyla-entertainment/$repo/commits/main"
+            $headers = @{
+              Authorization = "Bearer $env:GITHUB_TOKEN"
+              Accept        = "application/vnd.github+json"
+            }
+            $resp = Invoke-RestMethod -Uri $uri -Headers $headers
+            $sha = $resp.sha
+            $current[$repo] = $sha
+
+            if (-not $last.ContainsKey($repo) -or $last[$repo] -ne $sha) {
+              Write-Host "Change detected in $repo : $sha"
+              $changed = $true
+            } else {
+              Write-Host "No change in $repo"
+            }
+          }
+
+          $current | ConvertTo-Json | Set-Content last-shas.json
+
+          if ("${{ github.event_name }}" -ne "schedule") {
+            $changed = $true
+          }
+
+          echo "changed=$changed" >> $env:GITHUB_OUTPUT
+
       - name: Clone private repositories and build
+        if: steps.check.outputs.changed == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.VYLA_GITHUB_TOKEN }}
           PLAYER_TMDB_KEY: ${{ secrets.TMDB_KEY }}
           PLAYER_API_KEY: ${{ secrets.API_KEY }}
-          "STREAM-API_TMDB_API_KEY": ${{ secrets.TMDB_API_KEY }}
-          "STREAM-API_DATABASE_URL": ${{ secrets.DATABASE_URL }}
-          "STREAM-API_GA_API_SECRET": ${{ secrets.GA_API_SECRET }}
-          "STREAM-API_GA_MEASUREMENT_ID": ${{ secrets.GA_MEASUREMENT_ID }}
-          "STREAM-API_TOKEN_SECRET": ${{ secrets.TOKEN_SECRET }}
+          STREAM_API_TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          STREAM_API_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          STREAM_API_GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
+          STREAM_API_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+          STREAM_API_TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
           BUILD_SALT: ${{ secrets.BUILD_SALT }}
         run: |
           echo "Starting secure build process..."
           node build-pipeline.js
 
       - name: Verify build artifacts
+        if: steps.check.outputs.changed == 'true'
         run: |
           if (Test-Path "update-payload.zip") {
             Write-Host "✓ Build artifact verified: update-payload.zip exists"
@@ -70,13 +121,14 @@ jobs:
             exit 1
           }
 
-          if (Test-Path "integrity-report.json") {
-            Write-Host "✓ Integrity report verified"
+          if (Test-Path "validation-report.json") {
+            Write-Host "✓ Validation report verified"
           } else {
-            Write-Warning "⚠ Integrity report missing (non-critical)"
+            Write-Warning "⚠ Validation report missing (non-critical)"
           }
 
       - name: Package Electron app
+        if: steps.check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -85,13 +137,13 @@ jobs:
         continue-on-error: true
 
       - name: Upload build artifacts
+        if: steps.check.outputs.changed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: vyla-home-build
           path: |
             update-payload.zip
             manifest.json
-            integrity-report.json
             validation-report.json
           retention-days: 30
 
@@ -101,9 +153,10 @@ jobs:
           name: vyla-home-installer
           path: dist/*.exe
           retention-days: 30
-        if: success()
+        if: success() && steps.check.outputs.changed == 'true'
 
       - name: Create GitHub Release
+        if: steps.check.outputs.changed == 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ github.run_number }}

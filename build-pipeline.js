@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 const AdmZip = require('adm-zip');
 const { execSync } = require('child_process');
+const bytenode = require('bytenode');
 
 const BUILD_DIR = path.join(__dirname, 'dist-build');
 const REPOS = ['frontend', 'player', 'stream-api', 'live-api-streampk'];
@@ -83,6 +84,26 @@ function installDependencies() {
   }
 }
 
+function ensureBytenodeInstalled() {
+  for (const repo of REPOS) {
+    const repoDir = path.join(__dirname, repo);
+    if (!fs.existsSync(repoDir)) continue;
+
+    const bytenodePath = path.join(repoDir, 'node_modules', 'bytenode');
+    if (fs.existsSync(bytenodePath)) continue;
+
+    console.log(`Installing bytenode runtime dependency for ${repo}...`);
+    try {
+      execSync('npm install bytenode@^1.6.0 --no-save', {
+        cwd: repoDir,
+        stdio: 'inherit'
+      });
+    } catch (error) {
+      console.warn(`Failed to install bytenode for ${repo}, entrypoint bytecode loader may fail at runtime.`, error.message);
+    }
+  }
+}
+
 function cleanBuildDir() {
   if (fs.existsSync(BUILD_DIR)) {
     fs.rmSync(BUILD_DIR, { recursive: true, force: true });
@@ -103,6 +124,20 @@ function obfuscateFile(filePath) {
     stringArrayThreshold: 0.75
   });
   fs.writeFileSync(filePath, result.getObfuscatedCode(), 'utf8');
+}
+
+const BYTECODE_ENTRYPOINTS = new Set(['server.js']);
+
+function compileToBytecode(filePath) {
+  const jscPath = filePath.replace(/\.js$/, '.jsc');
+  bytenode.compileFile({
+    filename: filePath,
+    output: jscPath
+  });
+
+  const relativeRequire = './' + path.basename(jscPath);
+  const loaderStub = `require('bytenode');\nmodule.exports = require('${relativeRequire}');\n`;
+  fs.writeFileSync(filePath, loaderStub, 'utf8');
 }
 
 function encryptCredentialsFile() {
@@ -132,7 +167,7 @@ function encryptCredentialsFile() {
       for (const [service, keys] of Object.entries(credentials)) {
         envCredentials[service] = {};
         for (const key of Object.keys(keys)) {
-          const envVarName = `${service.toUpperCase()}_${key.toUpperCase()}`;
+          const envVarName = `${service.toUpperCase().replace(/-/g, '_')}_${key.toUpperCase()}`;
           if (process.env[envVarName]) {
             envCredentials[service][key] = process.env[envVarName];
           }
@@ -178,6 +213,15 @@ function processFolder(src, dest) {
           console.log(`Obfuscated: ${path.relative(BUILD_DIR, destPath)}`);
         } catch (e) {
           console.warn(`Failed to obfuscate: ${destPath}, keeping original.`, e.message);
+        }
+
+        if (BYTECODE_ENTRYPOINTS.has(file)) {
+          try {
+            compileToBytecode(destPath);
+            console.log(`Compiled to bytecode: ${path.relative(BUILD_DIR, destPath)}`);
+          } catch (e) {
+            console.warn(`Failed to compile bytecode: ${destPath}, keeping obfuscated JS.`, e.message);
+          }
         }
       }
     }
@@ -289,6 +333,8 @@ function build() {
     console.error('[Build] Dependency installation failed:', error.message);
     process.exit(1);
   }
+
+  ensureBytenodeInstalled();
 
   let encryptedCredentialsPath = null;
   try {
