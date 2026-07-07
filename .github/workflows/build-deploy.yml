@@ -8,6 +8,12 @@ on:
       - 'build-pipeline.js'
       - 'package.json'
       - 'config/**'
+      - 'main.js'
+      - 'service-manager.js'
+      - 'patcher.js'
+      - 'credential-manager.js'
+      - 'crypto-utils.js'
+      - 'update-client.js'
       - '.github/workflows/build-deploy.yml'
   workflow_dispatch:
 
