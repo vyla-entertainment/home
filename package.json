@@ -36,7 +36,6 @@
       "update-client.js",
       "config/**/*",
       "build/icon.ico",
-      "update-payload.zip",
       "package.json"
     ],
     "win": {
