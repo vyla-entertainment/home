@@ -1,8 +1,0 @@
-{
-  "_comment": "Update server configuration. Replace with your actual secure update server URLs.",
-  "manifestUrl": "https://api.vyla.cc/updates/manifest.json",
-  "payloadUrl": "https://api.vyla.cc/updates/payload.zip",
-  "licenseVerifyUrl": "https://api.vyla.cc/license/verify",
-  "apiKey": "",
-  "_comment2": "apiKey should be set via environment variable VYLA_UPDATE_API_KEY or bundled securely during build"
-}
