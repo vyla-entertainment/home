@@ -13,6 +13,19 @@ class ServiceManager {
     this.processes = {};
     this.restartCounts = {};
     this.isStopping = false;
+
+    this.logsDir = path.join(appDataPath, 'logs');
+    fs.mkdirSync(this.logsDir, { recursive: true });
+  }
+
+  logToFile(name, line) {
+    try {
+      const logPath = path.join(this.logsDir, `${name}.log`);
+      const timestamp = new Date().toISOString();
+      fs.appendFileSync(logPath, `[${timestamp}] ${line}\n`, 'utf8');
+    } catch (e) {
+      // Logging failures should never crash the app
+    }
   }
 
   async startService(name, relativeDir, startScript = 'server.js') {
@@ -35,6 +48,7 @@ class ServiceManager {
     };
 
     console.log(`Starting ${name} in ${serviceDir}...`);
+    this.logToFile(name, `--- Starting ${name} in ${serviceDir} ---`);
 
     const child = spawn(process.execPath, [scriptPath], {
       cwd: serviceDir,
@@ -50,27 +64,34 @@ class ServiceManager {
     };
 
     child.stdout.on('data', (data) => {
-      console.log(`${name} STDOUT: ${data.toString().trim()}`);
+      const text = data.toString().trim();
+      console.log(`${name} STDOUT: ${text}`);
+      this.logToFile(name, `STDOUT: ${text}`);
     });
 
     child.stderr.on('data', (data) => {
-      console.error(`${name} STDERR: ${data.toString().trim()}`);
+      const text = data.toString().trim();
+      console.error(`${name} STDERR: ${text}`);
+      this.logToFile(name, `STDERR: ${text}`);
     });
 
     child.on('exit', (code, signal) => {
       console.log(`Service "${name}" exited with code ${code}, signal ${signal}`);
+      this.logToFile(name, `EXITED: code=${code} signal=${signal}`);
       this.processes[name] = null;
 
       if (!this.isStopping) {
         this.restartCounts[name] = (this.restartCounts[name] || 0) + 1;
         if (this.restartCounts[name] > 5) {
           console.error(`Service "${name}" crashed too many times, giving up.`);
+          this.logToFile(name, `Crashed too many times, giving up.`);
           return;
         }
         console.log(`Restarting crashed service "${name}" in 3 seconds...`);
         setTimeout(() => {
           this.startService(name, relativeDir, startScript).catch(err => {
             console.error(`Failed to restart service "${name}":`, err);
+            this.logToFile(name, `Failed to restart: ${err.message}`);
           });
         }, 3000);
       }
