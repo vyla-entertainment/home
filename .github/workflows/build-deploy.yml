@@ -133,7 +133,6 @@ jobs:
         run: |
           Write-Host "Packaging Electron application..."
           npm run dist
-        continue-on-error: true
 
       - name: Upload build artifacts
         if: steps.check.outputs.changed == 'true'
