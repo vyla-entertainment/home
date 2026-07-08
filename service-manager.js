@@ -24,7 +24,6 @@ class ServiceManager {
       const timestamp = new Date().toISOString();
       fs.appendFileSync(logPath, `[${timestamp}] ${line}\n`, 'utf8');
     } catch (e) {
-      // Logging failures should never crash the app
     }
   }
 
@@ -44,7 +43,8 @@ class ServiceManager {
     const env = {
       ...process.env,
       ...(this.envConfig[name] || {}),
-      ...(this.credentialManager.getServiceCredentials(name) || {})
+      ...(this.credentialManager.getServiceCredentials(name) || {}),
+      ELECTRON_RUN_AS_NODE: '1'
     };
 
     console.log(`Starting ${name} in ${serviceDir}...`);
