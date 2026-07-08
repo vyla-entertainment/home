@@ -29,11 +29,12 @@
     },
     "files": [
       "main.js",
+      "preload.js",
       "service-manager.js",
       "patcher.js",
       "crypto-utils.js",
       "credential-manager.js",
-      "update-client.js",
+      "github-client.js",
       "config/**/*",
       "build/icon.ico",
       "package.json"
