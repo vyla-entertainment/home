@@ -34,7 +34,7 @@
       "patcher.js",
       "crypto-utils.js",
       "credential-manager.js",
-      "github-client.js",
+      "update-client.js",
       "config/**/*",
       "build/icon.ico",
       "package.json"
