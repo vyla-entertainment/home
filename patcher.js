@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const AdmZip = require('adm-zip');
+const CryptoUtils = require('./crypto-utils');
 
 class Patcher {
   constructor(appDataPath) {
@@ -18,6 +19,24 @@ class Patcher {
       }
     }
     return '0.0.0';
+  }
+
+  bridgeCredentials(credentialManager) {
+    const encryptedPath = path.join(this.appDataPath, 'encrypted-credentials.json');
+    if (!fs.existsSync(encryptedPath)) {
+      return false;
+    }
+
+    const buildKey = CryptoUtils.deriveKey('vyla-home-build-key', 'vyla-home-payload-salt-v1');
+    const encryptedData = fs.readFileSync(encryptedPath, 'utf8');
+    const credentials = CryptoUtils.decryptObject(encryptedData, buildKey);
+
+    for (const [service, keys] of Object.entries(credentials)) {
+      credentialManager.setServiceCredentials(service, keys);
+    }
+
+    fs.unlinkSync(encryptedPath);
+    return true;
   }
 
   saveCurrentVersion(version) {

@@ -409,6 +409,7 @@ button:active {
         }
 
         patcher.applyPatches(replacementsConfig);
+        patcher.bridgeCredentials(serviceManager.credentialManager);
         patcher.saveCurrentVersion(release.version);
 
         fs.unlinkSync(tempZipPath);
