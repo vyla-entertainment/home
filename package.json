@@ -37,6 +37,7 @@
       "update-client.js",
       "config/**/*",
       "build/icon.ico",
+      "build/logo.txt",
       "package.json"
     ],
     "win": {

@@ -29,8 +29,6 @@ function clonePrivateRepo(repoConfig, targetDir) {
   const token = getGitHubToken();
   const repoUrl = `https://${token}@github.com/${GITHUB_ORG}/${repoConfig.name}.git`;
 
-  console.log(`Cloning private repository: ${repoConfig.name}`);
-
   try {
     if (fs.existsSync(targetDir)) {
       fs.rmSync(targetDir, { recursive: true, force: true });
@@ -41,42 +39,31 @@ function clonePrivateRepo(repoConfig, targetDir) {
       env: { ...process.env, GIT_TERMINAL_PROMPT: '0' }
     });
 
-    console.log(`Successfully cloned: ${repoConfig.name}`);
   } catch (error) {
     throw new Error(`Failed to clone ${repoConfig.name}: ${error.message}`);
   }
 }
 
 function cloneAllRepos() {
-  console.log('Starting repository clone process...');
-
   for (const [key, config] of Object.entries(REPO_CONFIG)) {
     const targetDir = path.join(__dirname, key);
     clonePrivateRepo(config, targetDir);
   }
-
-  console.log('All repositories cloned successfully');
 }
 
 function installDependencies() {
-  console.log('Installing dependencies for each service...');
-
   for (const repo of REPOS) {
     const repoDir = path.join(__dirname, repo);
     const pkgJsonPath = path.join(repoDir, 'package.json');
 
     if (!fs.existsSync(pkgJsonPath)) {
-      console.warn(`No package.json found for ${repo}, skipping npm install`);
       continue;
     }
-
-    console.log(`Running npm install for ${repo}...`);
     try {
       execSync('npm install --omit=dev', {
         cwd: repoDir,
         stdio: 'inherit'
       });
-      console.log(`Dependencies installed for ${repo}`);
     } catch (error) {
       throw new Error(`npm install failed for ${repo}: ${error.message}`);
     }
@@ -112,7 +99,6 @@ function encryptCredentialsFile() {
   const encryptedOutput = path.join(__dirname, 'config/encrypted-credentials.json');
 
   if (!fs.existsSync(credentialsTemplate)) {
-    console.warn('[Build] No credentials template found, skipping encryption');
     return null;
   }
 
@@ -126,8 +112,6 @@ function encryptCredentialsFile() {
     );
 
     if (hasPlaceholders) {
-      console.warn('[Build] Credentials template contains placeholder values. Using environment variables if available.');
-
       const envCredentials = {};
       for (const [service, keys] of Object.entries(credentials)) {
         envCredentials[service] = {};
@@ -148,11 +132,9 @@ function encryptCredentialsFile() {
     const encryptedData = CryptoUtils.encryptObject(credentials, buildKey);
 
     fs.writeFileSync(encryptedOutput, encryptedData, 'utf8');
-    console.log('[Build] Credentials encrypted and saved to config/encrypted-credentials.json');
 
     return encryptedOutput;
   } catch (error) {
-    console.error('[Build] Failed to encrypt credentials:', error.message);
     throw error;
   }
 }
@@ -175,9 +157,7 @@ function processFolder(src, dest) {
       if (ext === '.js') {
         try {
           obfuscateFile(destPath);
-          console.log(`Obfuscated: ${path.relative(BUILD_DIR, destPath)}`);
         } catch (e) {
-          console.warn(`Failed to obfuscate: ${destPath}, keeping original.`, e.message);
         }
       }
     }
@@ -192,7 +172,6 @@ function getFileChecksum(filePath) {
 }
 
 function validatePayload(zipPath) {
-  console.log('[Validation] Extracting generated ZIP for verification...');
   if (fs.existsSync(TEMP_EXTRACT_DIR)) {
     fs.rmSync(TEMP_EXTRACT_DIR, { recursive: true, force: true });
   }
@@ -255,30 +234,22 @@ function validatePayload(zipPath) {
   fs.writeFileSync(path.join(__dirname, 'validation-report.json'), JSON.stringify(validationResults, null, 2), 'utf8');
 
   if (!validationResults.valid) {
-    console.error('[Validation] Validation failed! Aborting publication.');
-    console.error(validationResults.errors.join('\n'));
     process.exit(1);
   }
 
-  console.log('[Validation] Validation passed successfully!');
   return validationResults.checksum;
 }
 
 function build() {
-  console.log('[Build] Starting secure build process...');
-
   try {
     cloneAllRepos();
   } catch (error) {
-    console.error('[Build] Failed to clone repositories:', error.message);
-    console.error('[Build] Ensure GITHUB_TOKEN or VYLA_GITHUB_TOKEN is set with proper permissions.');
     process.exit(1);
   }
 
   for (const repo of REPOS) {
     const srcRepo = path.join(__dirname, repo);
     if (!fs.existsSync(srcRepo)) {
-      console.error(`Repository directory missing: ${repo}. Aborting.`);
       process.exit(1);
     }
   }
@@ -286,7 +257,6 @@ function build() {
   try {
     installDependencies();
   } catch (error) {
-    console.error('[Build] Dependency installation failed:', error.message);
     process.exit(1);
   }
 
@@ -294,7 +264,6 @@ function build() {
   try {
     encryptedCredentialsPath = encryptCredentialsFile();
   } catch (error) {
-    console.warn('[Build] Credential encryption failed, continuing without credentials:', error.message);
   }
 
   cleanBuildDir();
@@ -302,19 +271,16 @@ function build() {
   for (const repo of REPOS) {
     const srcRepo = path.join(__dirname, repo);
     const destRepo = path.join(BUILD_DIR, repo);
-    console.log(`Processing repository: ${repo}...`);
     processFolder(srcRepo, destRepo);
 
     const srcModules = path.join(srcRepo, 'node_modules');
     const destModules = path.join(destRepo, 'node_modules');
     if (fs.existsSync(srcModules)) {
-      console.log(`Copying node_modules for ${repo}...`);
       fs.cpSync(srcModules, destModules, { recursive: true });
     }
   }
 
   if (encryptedCredentialsPath && fs.existsSync(encryptedCredentialsPath)) {
-    console.log('[Build] Including encrypted credentials in payload...');
     const credentialsDest = path.join(BUILD_DIR, 'encrypted-credentials.json');
     fs.copyFileSync(encryptedCredentialsPath, credentialsDest);
   }

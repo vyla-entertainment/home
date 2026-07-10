@@ -16,13 +16,10 @@ class CredentialManager {
       if (fs.existsSync(this.credentialsPath)) {
         const encryptedData = fs.readFileSync(this.credentialsPath, 'utf8');
         this.credentials = CryptoUtils.decryptObject(encryptedData, this.encryptionKey);
-        console.log('[CredentialManager] Credentials loaded successfully');
       } else {
         this.credentials = {};
-        console.log('[CredentialManager] No existing credentials found');
       }
     } catch (error) {
-      console.error('[CredentialManager] Failed to load credentials:', error.message);
       this.credentials = {};
     }
   }
@@ -31,9 +28,7 @@ class CredentialManager {
     try {
       const encryptedData = CryptoUtils.encryptObject(this.credentials, this.encryptionKey);
       fs.writeFileSync(this.credentialsPath, encryptedData, 'utf8');
-      console.log('[CredentialManager] Credentials saved successfully');
     } catch (error) {
-      console.error('[CredentialManager] Failed to save credentials:', error.message);
       throw error;
     }
   }
@@ -99,7 +94,6 @@ class CredentialManager {
       CryptoUtils.decryptObject(encryptedData, this.encryptionKey);
       return true;
     } catch (error) {
-      console.error('[CredentialManager] Integrity check failed:', error.message);
       return false;
     }
   }
@@ -109,7 +103,6 @@ class CredentialManager {
     if (fs.existsSync(this.credentialsPath)) {
       fs.unlinkSync(this.credentialsPath);
     }
-    console.log('[CredentialManager] Credentials reset');
   }
 }
 

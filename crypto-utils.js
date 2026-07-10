@@ -19,7 +19,6 @@ class CryptoUtils {
       hash.update(machineId);
       return hash.digest('hex');
     } catch (error) {
-      console.error('[CryptoUtils] Failed to generate machine key:', error.message);
       const fallback = crypto.createHash('sha256');
       fallback.update(os.hostname() + Date.now());
       return fallback.digest('hex');
