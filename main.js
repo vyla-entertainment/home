@@ -76,31 +76,21 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 22px;
   user-select: none;
 }
 
 .spinner {
-  width: 22px;
-  height: 22px;
-  animation: spin 0.8s linear infinite;
-}
-
-.spinner circle {
-  fill: none;
-  stroke: rgba(255,255,255,.95);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 1, 200;
-  stroke-dashoffset: 0;
-  animation: dash 1.5s ease-in-out infinite;
+  width: 40px;
+  height: 40px;
 }
 
 #status {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: rgba(255,255,255,.55);
-  letter-spacing: -.01em;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
 }
 
 @keyframes spin {
@@ -128,7 +118,7 @@ body {
 <body>
 
 <div class="loader">
-  <svg class="spinner" fill="hsl(228, 97%, 42%)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" rx="1" width="10" height="10"><animate id="spinner_c7A9" begin="0;spinner_23zP.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_Acnw" begin="spinner_ZmWi.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_iIcm" begin="spinner_zfQN.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_WX4U" begin="spinner_rRAc.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="1" y="13" rx="1" width="10" height="10"><animate id="spinner_YLx7" begin="spinner_c7A9.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_vwnJ" begin="spinner_Acnw.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_KQuy" begin="spinner_iIcm.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_arKy" begin="spinner_WX4U.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="13" y="13" rx="1" width="10" height="10"><animate id="spinner_ZmWi" begin="spinner_YLx7.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_zfQN" begin="spinner_vwnJ.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_rRAc" begin="spinner_KQuy.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_23zP" begin="spinner_arKy.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/></rect></svg>
+  <svg class="spinner" fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" rx="1" width="10" height="10"><animate id="spinner_c7A9" begin="0;spinner_23zP.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_Acnw" begin="spinner_ZmWi.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_iIcm" begin="spinner_zfQN.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_WX4U" begin="spinner_rRAc.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="1" y="13" rx="1" width="10" height="10"><animate id="spinner_YLx7" begin="spinner_c7A9.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_vwnJ" begin="spinner_Acnw.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_KQuy" begin="spinner_iIcm.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_arKy" begin="spinner_WX4U.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="13" y="13" rx="1" width="10" height="10"><animate id="spinner_ZmWi" begin="spinner_YLx7.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_zfQN" begin="spinner_vwnJ.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_rRAc" begin="spinner_KQuy.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_23zP" begin="spinner_arKy.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/></rect></svg>
   <div id="status">Starting…</div>
 </div>
 
@@ -218,31 +208,27 @@ p {
 button {
   appearance: none;
   border: 0;
-  border-radius: 999px;
-  padding: 10px 18px;
+  border-radius: 8px;
+  padding: 11px 20px;
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: opacity .2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  transition: opacity .15s ease, transform .15s ease;
   min-width: 120px;
 }
 
 button:hover:not(:disabled) {
-  opacity: .82;
+  opacity: .85;
 }
 
 button:active:not(:disabled) {
-  opacity: .65;
+  transform: scale(.97);
 }
 
 button:disabled {
   cursor: default;
-  opacity: .65;
+  opacity: .35;
 }
 
 .primary {
@@ -251,22 +237,8 @@ button:disabled {
 }
 
 .secondary {
-  background: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.1);
   color: #fff;
-}
-
-.btn-spinner {
-  width: 14px;
-  height: 14px;
-  display: none;
-}
-
-button.loading .btn-spinner {
-  display: block;
-}
-
-button.loading .btn-label {
-  display: none;
 }
 </style>
 </head>
@@ -283,23 +255,19 @@ button.loading .btn-label {
 
   <p>You're running version ${currentVersion}. Version ${newVersion} is available.\nInstalling will fetch the latest build.</p>
 
-  <div class="buttons">
-    <button id="skipBtn" class="secondary" onclick="handleChoice('skip', this)">
-      <span class="btn-label">Skip For Now</span>
-      <svg class="btn-spinner" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" rx="1" width="10" height="10"><animate id="s1a" begin="0;s1d.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="s1b" begin="s1e.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="s1c" begin="s1f.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="s1d" begin="s1g.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="1" y="13" rx="1" width="10" height="10"><animate id="s1h" begin="s1a.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="s1e" begin="s1b.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="s1i" begin="s1c.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="s1j" begin="s1d.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="13" y="13" rx="1" width="10" height="10"><animate id="s1f" begin="s1h.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="s1g" begin="s1e.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="s1k" begin="s1i.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="s1l" begin="s1j.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/></rect></svg>
-    </button>
-    <button id="installBtn" class="primary" onclick="handleChoice('install', this)">
-      <span class="btn-label">Install Update</span>
-      <svg class="btn-spinner" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" rx="1" width="10" height="10"><animate id="s2a" begin="0;s2d.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="s2b" begin="s2e.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="s2c" begin="s2f.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="s2d" begin="s2g.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="1" y="13" rx="1" width="10" height="10"><animate id="s2h" begin="s2a.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="s2e" begin="s2b.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="s2i" begin="s2c.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="s2j" begin="s2d.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="13" y="13" rx="1" width="10" height="10"><animate id="s2f" begin="s2h.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="s2g" begin="s2e.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="s2k" begin="s2i.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="s2l" begin="s2j.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/></rect></svg>
-    </button>
-  </div>
+<div class="buttons">
+  <button id="skipBtn" class="secondary" onclick="handleChoice('skip')">
+    Skip For Now
+  </button>
+  <button id="installBtn" class="primary" onclick="handleChoice('install')">
+    Install Update
+  </button>
 </div>
 
 <script>
-function handleChoice(choice, btn) {
+function handleChoice(choice) {
   document.getElementById('skipBtn').disabled = true;
   document.getElementById('installBtn').disabled = true;
-  btn.classList.add('loading');
   window.vylaHome.sendUpdateChoice(choice);
 }
 </script>
