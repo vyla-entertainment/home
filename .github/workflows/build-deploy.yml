@@ -98,6 +98,10 @@ jobs:
           STREAM_API_GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
           STREAM_API_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           STREAM_API_TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
+          PLAYER_BASE_URL: ${{ secrets.BASE_URL }}
+          STREAM_API_PROXY_URL: ${{ secrets.PROXY_URL }}
+          STREAM_API_PROXY_STREAMS: ${{ secrets.PROXY_STREAMS }}
+          STREAM_API_ENABLE_DEBUG_ROUTE: ${{ secrets.ENABLE_DEBUG_ROUTE }}
         run: |
           echo "Starting secure build process..."
           node build-pipeline.js
