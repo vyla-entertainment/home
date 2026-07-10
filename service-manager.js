@@ -9,9 +9,9 @@ class ServiceManager {
     this.appDataPath = appDataPath;
     this.envConfig = envConfig;
     this.credentialManager = new CredentialManager(appDataPath);
-    this.credentialManager.loadCredentials();
     this.processes = {};
     this.restartCounts = {};
+    this.stableTimers = {};
     this.isStopping = false;
 
     this.logsDir = path.join(appDataPath, 'logs');
@@ -61,6 +61,13 @@ class ServiceManager {
       status: 'starting'
     };
 
+    if (this.stableTimers[name]) {
+      clearTimeout(this.stableTimers[name]);
+    }
+    this.stableTimers[name] = setTimeout(() => {
+      this.restartCounts[name] = 0;
+    }, 60000);
+
     child.stdout.on('data', (data) => {
       const text = data.toString().trim();
       this.logToFile(name, `STDOUT: ${text}`);
@@ -74,6 +81,11 @@ class ServiceManager {
     child.on('exit', (code, signal) => {
       this.logToFile(name, `EXITED: code=${code} signal=${signal}`);
       this.processes[name] = null;
+
+      if (this.stableTimers[name]) {
+        clearTimeout(this.stableTimers[name]);
+        this.stableTimers[name] = null;
+      }
 
       if (!this.isStopping) {
         this.restartCounts[name] = (this.restartCounts[name] || 0) + 1;
@@ -90,8 +102,24 @@ class ServiceManager {
     });
   }
 
+  async startServices(services) {
+    await Promise.all(services.map(({ name, relativeDir, startScript }) =>
+      this.startService(name, relativeDir, startScript)
+    ));
+  }
+
+  async waitForPorts(ports, timeoutMs = 30000) {
+    await Promise.all(ports.map((port) => this.waitForPort(port, timeoutMs)));
+  }
+
   async stopAll() {
     this.isStopping = true;
+    for (const name of Object.keys(this.stableTimers)) {
+      if (this.stableTimers[name]) {
+        clearTimeout(this.stableTimers[name]);
+      }
+    }
+    this.stableTimers = {};
     const killPromises = Object.keys(this.processes).map((name) => {
       const procInfo = this.processes[name];
       if (procInfo && procInfo.child) {

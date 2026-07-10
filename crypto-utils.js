@@ -3,7 +3,24 @@ const os = require('os');
 const { execSync } = require('child_process');
 
 class CryptoUtils {
-  static getMachineKey() {
+  static getMachineKey(cacheDir) {
+    if (this._cachedMachineKey) {
+      return this._cachedMachineKey;
+    }
+
+    const cachePath = cacheDir ? require('path').join(cacheDir, '.machine-key-cache') : null;
+    if (cachePath && require('fs').existsSync(cachePath)) {
+      try {
+        const cached = require('fs').readFileSync(cachePath, 'utf8').trim();
+        if (cached) {
+          this._cachedMachineKey = cached;
+          return cached;
+        }
+      } catch (e) {
+      }
+    }
+
+    let key;
     try {
       const machineId = [
         os.hostname(),
@@ -17,12 +34,21 @@ class CryptoUtils {
 
       const hash = crypto.createHash('sha256');
       hash.update(machineId);
-      return hash.digest('hex');
+      key = hash.digest('hex');
     } catch (error) {
       const fallback = crypto.createHash('sha256');
       fallback.update(os.hostname() + Date.now());
-      return fallback.digest('hex');
+      key = fallback.digest('hex');
     }
+
+    this._cachedMachineKey = key;
+    if (cachePath) {
+      try {
+        require('fs').writeFileSync(cachePath, key, 'utf8');
+      } catch (e) {
+      }
+    }
+    return key;
   }
 
   static getMachineId() {
@@ -49,12 +75,12 @@ class CryptoUtils {
     try {
       const iv = crypto.randomBytes(16);
       const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-      
+
       let encrypted = cipher.update(plaintext, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       const authTag = cipher.getAuthTag();
-      
+
       return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
     } catch (error) {
       throw new Error(`Encryption failed: ${error.message}`);
@@ -74,10 +100,10 @@ class CryptoUtils {
 
       const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
       decipher.setAuthTag(authTag);
-      
+
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
-      
+
       return decrypted;
     } catch (error) {
       throw new Error(`Decryption failed: ${error.message}`);

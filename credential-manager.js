@@ -6,7 +6,7 @@ class CredentialManager {
   constructor(appDataPath) {
     this.appDataPath = appDataPath;
     this.credentialsPath = path.join(appDataPath, 'vyla-credentials-store.json');
-    this.machineKey = CryptoUtils.getMachineKey();
+    this.machineKey = CryptoUtils.getMachineKey(appDataPath);
     this.encryptionKey = CryptoUtils.deriveKey(this.machineKey);
     this.credentials = {};
   }

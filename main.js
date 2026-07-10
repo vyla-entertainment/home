@@ -32,6 +32,15 @@ const replacementsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'conf
 
 const updateClient = new UpdateClient(APPDATA_DIR);
 
+process.on('unhandledRejection', (reason) => {
+  const message = reason && reason.message ? reason.message : String(reason);
+  fs.appendFileSync(path.join(APPDATA_DIR, 'crash.log'), `[${new Date().toISOString()}] UNHANDLED REJECTION: ${message}\n`, 'utf8');
+});
+
+process.on('uncaughtException', (err) => {
+  fs.appendFileSync(path.join(APPDATA_DIR, 'crash.log'), `[${new Date().toISOString()}] UNCAUGHT EXCEPTION: ${err.message}\n`, 'utf8');
+});
+
 async function createWindow() {
   const asciiLogo = fs.readFileSync(path.join(__dirname, 'build', 'logo.txt'), 'utf8');
 
@@ -54,6 +63,11 @@ async function createWindow() {
   });
 
   Menu.setApplicationMenu(null);
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    mainWindow.loadURL(url);
+    return { action: 'deny' };
+  });
 
   mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(`
 <!DOCTYPE html>
@@ -582,13 +596,13 @@ button:active {
 
     serviceManager.credentialManager.loadCredentials();
 
-    await serviceManager.startService('player', 'player');
-    await serviceManager.startService('stream-api', 'stream-api');
-    await serviceManager.startService('live-api-streampk', 'live-api-streampk');
+    await serviceManager.startServices([
+      { name: 'player', relativeDir: 'player' },
+      { name: 'stream-api', relativeDir: 'stream-api' },
+      { name: 'live-api-streampk', relativeDir: 'live-api-streampk' }
+    ]);
 
-    await serviceManager.waitForPort(3000);
-    await serviceManager.waitForPort(7860);
-    await serviceManager.waitForPort(5000);
+    await serviceManager.waitForPorts([3000, 7860, 5000]);
 
     const frontendDir = path.join(APPDATA_DIR, 'frontend');
     expressApp = express();
