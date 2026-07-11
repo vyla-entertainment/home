@@ -1,6 +1,6 @@
 {
-  "player": "f68eac9032925b1cbece48711519b2ac7a3157bb",
   "stream-api": "da4164f07ffdcbf9b268bb283f4a836aedd09f0a",
-  "frontend": "5a4cbd9aedaf3736897b709fa69541e266e40fb2",
-  "live-api-streampk": "6f28e7a98bf5f6713b321de603d1da11e663cc20"
+  "frontend": "1258e57d171898a47bc637e2a1b9c5a27ada09af",
+  "live-api-streampk": "6f28e7a98bf5f6713b321de603d1da11e663cc20",
+  "player": "f68eac9032925b1cbece48711519b2ac7a3157bb"
 }
