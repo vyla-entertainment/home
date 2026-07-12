@@ -315,10 +315,10 @@ function build() {
 
   const checksum = validatePayload(zipPath);
 
-  let wrapperVersion = '1.0.0';
+  let wrapperVersion = '2.0.0';
   try {
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
-    wrapperVersion = pkg.version || '1.0.0';
+    wrapperVersion = pkg.version || '2.0.0';
   } catch (e) { }
 
   const manifest = {
