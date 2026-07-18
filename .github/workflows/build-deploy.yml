@@ -94,7 +94,6 @@ jobs:
           PLAYER_TMDB_KEY: ${{ secrets.TMDB_KEY }}
           PLAYER_API_KEY: ${{ secrets.API_KEY }}
           STREAM_API_TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          STREAM_API_DATABASE_URL: ${{ secrets.DATABASE_URL }}
           STREAM_API_GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
           STREAM_API_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           STREAM_API_TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
