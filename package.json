@@ -7,15 +7,19 @@
     "start": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "build": "node build-pipeline.js"
+    "build": "node build-pipeline.js",
+    "postinstall": "electron-rebuild -f -w better-sqlite3"
   },
   "dependencies": {
-    "adm-zip": "^0.5.10",
+    "adm-zip": "^0.6.0",
+    "audit": "^0.0.6",
+    "better-sqlite3": "^12.11.1",
     "express": "^4.19.2"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
     "electron": "^43.0.0",
-    "electron-builder": "^25.1.8",
+    "electron-builder": "^26.15.3",
     "javascript-obfuscator": "^4.1.0"
   },
   "overrides": {
