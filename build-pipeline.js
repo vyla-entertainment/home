@@ -67,13 +67,17 @@ function installDependencies() {
 
       const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
       const hasNativeDeps = pkg.dependencies && Object.keys(pkg.dependencies).some(dep =>
-        ['better-sqlite3', 'bcrypt', 'sharp', 'sqlite3'].includes(dep)
+        ['bcrypt', 'sharp', 'sqlite3'].includes(dep)
       );
 
       if (hasNativeDeps) {
         const electronVersion = JSON.parse(
           fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')
-        ).devDependencies.electron.replace(/[\^~]/, '');
+        ).devDependencies.electron.replace(/^[\^~]/, '');
+
+        if (!/^\d+\.\d+\.\d+$/.test(electronVersion)) {
+          throw new Error(`Cannot resolve exact Electron version from "${electronVersion}"; pin an exact version in package.json devDependencies before building.`);
+        }
 
         const rebuildBin = path.join(__dirname, 'node_modules', '.bin', process.platform === 'win32' ? 'electron-rebuild.cmd' : 'electron-rebuild');
 
