@@ -4,18 +4,14 @@ const { execSync } = require('child_process');
 
 class CryptoUtils {
   static getMachineKey(cacheDir) {
-    if (this._cachedMachineKey) {
-      return this._cachedMachineKey;
-    }
+    const path = require('path');
+    const fs = require('fs');
+    const cachePath = cacheDir ? path.join(cacheDir, '.machine-key-cache') : null;
 
-    const cachePath = cacheDir ? require('path').join(cacheDir, '.machine-key-cache') : null;
-    if (cachePath && require('fs').existsSync(cachePath)) {
+    if (cachePath && fs.existsSync(cachePath)) {
       try {
-        const cached = require('fs').readFileSync(cachePath, 'utf8').trim();
-        if (cached) {
-          this._cachedMachineKey = cached;
-          return cached;
-        }
+        const cached = fs.readFileSync(cachePath, 'utf8').trim();
+        if (cached) return cached;
       } catch (e) {
       }
     }
@@ -41,10 +37,9 @@ class CryptoUtils {
       key = fallback.digest('hex');
     }
 
-    this._cachedMachineKey = key;
     if (cachePath) {
       try {
-        require('fs').writeFileSync(cachePath, key, 'utf8');
+        fs.writeFileSync(cachePath, key, 'utf8');
       } catch (e) {
       }
     }
@@ -52,16 +47,30 @@ class CryptoUtils {
   }
 
   static getMachineId() {
-    try {
-      if (os.platform() === 'win32') {
+    if (os.platform() === 'win32') {
+      try {
         return execSync('wmic csproduct get uuid').toString().split('\n')[1].trim();
-      } else if (os.platform() === 'darwin') {
-        return execSync('ioreg -rd1 -c IOPlatformExpertDevice | awk -F\'"\' \'/IOPlatformUUID/{print $4}\'').toString().trim();
-      } else {
-        return execSync('cat /etc/machine-id 2>/dev/null || cat /var/lib/dbus/machine-id 2>/dev/null').toString().trim();
+      } catch (e) {
       }
-    } catch (error) {
+      try {
+        const out = execSync('reg query "HKLM\\SOFTWARE\\Microsoft\\Cryptography" /v MachineGuid').toString();
+        const match = out.match(/MachineGuid\s+REG_SZ\s+([^\r\n]+)/);
+        if (match) return match[1].trim();
+      } catch (e) {
+      }
       return 'unknown-machine';
+    } else if (os.platform() === 'darwin') {
+      try {
+        return execSync('ioreg -rd1 -c IOPlatformExpertDevice | awk -F\'"\' \'/IOPlatformUUID/{print $4}\'').toString().trim();
+      } catch (e) {
+        return 'unknown-machine';
+      }
+    } else {
+      try {
+        return execSync('cat /etc/machine-id 2>/dev/null || cat /var/lib/dbus/machine-id 2>/dev/null').toString().trim();
+      } catch (e) {
+        return 'unknown-machine';
+      }
     }
   }
 

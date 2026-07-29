@@ -51,44 +51,46 @@ function cloneAllRepos() {
   }
 }
 
-function installDependencies() {
-  for (const repo of REPOS) {
-    const repoDir = path.join(__dirname, repo);
-    const pkgJsonPath = path.join(repoDir, 'package.json');
+async function installDependencies() {
+  await Promise.all(REPOS.map(repo => installOneRepo(repo)));
+}
 
-    if (!fs.existsSync(pkgJsonPath)) {
-      continue;
-    }
-    try {
-      execSync('npm install --omit=dev', {
-        cwd: repoDir,
+function installOneRepo(repo) {
+  const repoDir = path.join(__dirname, repo);
+  const pkgJsonPath = path.join(repoDir, 'package.json');
+
+  if (!fs.existsSync(pkgJsonPath)) {
+    return;
+  }
+  try {
+    execSync('npm install --omit=dev', {
+      cwd: repoDir,
+      stdio: 'inherit'
+    });
+
+    const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+    const hasNativeDeps = pkg.dependencies && Object.keys(pkg.dependencies).some(dep =>
+      ['bcrypt', 'sharp', 'sqlite3'].includes(dep)
+    );
+
+    if (hasNativeDeps) {
+      const electronVersion = JSON.parse(
+        fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')
+      ).devDependencies.electron.replace(/^[\^~]/, '');
+
+      if (!/^\d+\.\d+\.\d+$/.test(electronVersion)) {
+        throw new Error(`Cannot resolve exact Electron version from "${electronVersion}"; pin an exact version in package.json devDependencies before building.`);
+      }
+
+      const rebuildBin = path.join(__dirname, 'node_modules', '.bin', process.platform === 'win32' ? 'electron-rebuild.cmd' : 'electron-rebuild');
+
+      execSync(`"${rebuildBin}" -f -v ${electronVersion} -m "${repoDir}"`, {
+        cwd: __dirname,
         stdio: 'inherit'
       });
-
-      const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
-      const hasNativeDeps = pkg.dependencies && Object.keys(pkg.dependencies).some(dep =>
-        ['bcrypt', 'sharp', 'sqlite3'].includes(dep)
-      );
-
-      if (hasNativeDeps) {
-        const electronVersion = JSON.parse(
-          fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')
-        ).devDependencies.electron.replace(/^[\^~]/, '');
-
-        if (!/^\d+\.\d+\.\d+$/.test(electronVersion)) {
-          throw new Error(`Cannot resolve exact Electron version from "${electronVersion}"; pin an exact version in package.json devDependencies before building.`);
-        }
-
-        const rebuildBin = path.join(__dirname, 'node_modules', '.bin', process.platform === 'win32' ? 'electron-rebuild.cmd' : 'electron-rebuild');
-
-        execSync(`"${rebuildBin}" -f -v ${electronVersion} -m "${repoDir}"`, {
-          cwd: __dirname,
-          stdio: 'inherit'
-        });
-      }
-    } catch (error) {
-      throw new Error(`npm install failed for ${repo}: ${error.message}`);
     }
+  } catch (error) {
+    throw new Error(`npm install failed for ${repo}: ${error.message}`);
   }
 }
 
@@ -109,7 +111,8 @@ function obfuscateFile(filePath) {
     numbersToExpressions: false,
     simplify: true,
     stringArray: true,
-    stringArrayThreshold: 0.75
+    stringArrayThreshold: 0.4,
+    stringArrayEncoding: []
   });
   fs.writeFileSync(filePath, result.getObfuscatedCode(), 'utf8');
 }
@@ -161,7 +164,7 @@ function encryptCredentialsFile() {
   }
 }
 
-function processFolder(src, dest) {
+function collectJsFiles(src, dest, out) {
   const files = fs.readdirSync(src);
   fs.mkdirSync(dest, { recursive: true });
 
@@ -172,16 +175,23 @@ function processFolder(src, dest) {
 
     if (stat.isDirectory()) {
       if (file === 'node_modules' || file === '.git' || file === '.github') continue;
-      processFolder(srcPath, destPath);
+      collectJsFiles(srcPath, destPath, out);
     } else if (stat.isFile()) {
       fs.copyFileSync(srcPath, destPath);
-      const ext = path.extname(srcPath).toLowerCase();
-      if (ext === '.js') {
-        try {
-          obfuscateFile(destPath);
-        } catch (e) {
-        }
+      if (path.extname(srcPath).toLowerCase() === '.js') {
+        out.push(destPath);
       }
+    }
+  }
+}
+
+function processFolder(src, dest) {
+  const jsFiles = [];
+  collectJsFiles(src, dest, jsFiles);
+  for (const filePath of jsFiles) {
+    try {
+      obfuscateFile(filePath);
+    } catch (e) {
     }
   }
 }
@@ -262,7 +272,7 @@ function validatePayload(zipPath) {
   return validationResults.checksum;
 }
 
-function build() {
+async function build() {
   try {
     cloneAllRepos();
   } catch (error) {
@@ -277,7 +287,7 @@ function build() {
   }
 
   try {
-    installDependencies();
+    await installDependencies();
   } catch (error) {
     process.exit(1);
   }
@@ -298,7 +308,10 @@ function build() {
     const srcModules = path.join(srcRepo, 'node_modules');
     const destModules = path.join(destRepo, 'node_modules');
     if (fs.existsSync(srcModules)) {
-      fs.cpSync(srcModules, destModules, { recursive: true });
+      fs.cpSync(srcModules, destModules, {
+        recursive: true,
+        filter: (src) => !/[\\/](test|tests|docs|\.github|\.git)([\\/]|$)/.test(src) && !/\.(md|markdown|map|ts)$/i.test(src)
+      });
     }
   }
 
@@ -361,4 +374,4 @@ function build() {
 
 }
 
-build();
+build().catch(() => process.exit(1));

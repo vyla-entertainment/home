@@ -4,6 +4,15 @@ const fs = require('fs');
 const GITHUB_ORG = 'vyla-entertainment';
 const GITHUB_REPO = 'home';
 const RELEASES_API = `https://api.github.com/repos/${GITHUB_ORG}/${GITHUB_REPO}/releases/latest`;
+const ALLOWED_REDIRECT_HOSTS = ['api.github.com', 'github.com', 'objects.githubusercontent.com', 'release-assets.githubusercontent.com'];
+
+function isAllowedHost(url) {
+  try {
+    return ALLOWED_REDIRECT_HOSTS.includes(new URL(url).hostname);
+  } catch (e) {
+    return false;
+  }
+}
 
 class UpdateClient {
   constructor(appDataPath) {
@@ -72,6 +81,10 @@ class UpdateClient {
         const req = https.get(requestOptions, (res) => {
           if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
             res.resume();
+            if (!isAllowedHost(res.headers.location)) {
+              reject(new Error(`Redirect to disallowed host: ${res.headers.location}`));
+              return;
+            }
             doRequest(res.headers.location, redirectCount + 1);
             return;
           }
@@ -99,19 +112,19 @@ class UpdateClient {
           });
 
           file.on('error', (err) => {
-            fs.unlink(destPath, () => {});
+            fs.unlink(destPath, () => { });
             reject(err);
           });
         });
 
         req.on('error', (err) => {
-          fs.unlink(destPath, () => {});
+          fs.unlink(destPath, () => { });
           reject(err);
         });
 
         req.setTimeout(120000, () => {
           req.destroy();
-          fs.unlink(destPath, () => {});
+          fs.unlink(destPath, () => { });
           reject(new Error('Download timeout'));
         });
       };

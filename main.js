@@ -604,9 +604,22 @@ button:active {
 
     await serviceManager.waitForPorts([3000, 7860, 5000]);
 
+    const healthChecks = [
+      { port: 3000, name: 'player' },
+      { port: 7860, name: 'stream-api' },
+      { port: 5000, name: 'live-api-streampk' }
+    ];
+    for (const { port, name } of healthChecks) {
+      try {
+        await serviceManager.checkHealth(port, '/');
+      } catch (e) {
+        serviceManager.logToFile(name, `Health check on / did not pass, continuing anyway: ${e.message}`);
+      }
+    }
+
     const frontendDir = path.join(APPDATA_DIR, 'frontend');
     expressApp = express();
-    expressApp.use(express.static(frontendDir));
+    expressApp.use(express.static(frontendDir, { maxAge: '1d', etag: true }));
     expressApp.get('*', (req, res) => {
       res.sendFile(path.join(frontendDir, 'index.html'));
     });

@@ -85,7 +85,11 @@ class Patcher {
       if (stat.size === 0) {
         return false;
       }
-      const buffer = fs.readFileSync(fullPath);
+      const sampleSize = Math.min(stat.size, 4096);
+      const fd = fs.openSync(fullPath, 'r');
+      const buffer = Buffer.alloc(sampleSize);
+      fs.readSync(fd, buffer, 0, sampleSize, 0);
+      fs.closeSync(fd);
       if (buffer.every(byte => byte === 0)) {
         return false;
       }

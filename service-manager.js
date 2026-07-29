@@ -165,30 +165,6 @@ class ServiceManager {
     }
     throw new Error(`Timeout waiting for port ${port}`);
   }
-
-  async checkHealth(port, path = '/', timeoutMs = 15000) {
-    const start = Date.now();
-    while (Date.now() - start < timeoutMs) {
-      if (this.isStopping) return false;
-      const ok = await new Promise((resolve) => {
-        const req = http.get(`http://127.0.0.1:${port}${path}`, { timeout: 1000 }, (res) => {
-          if (res.statusCode >= 200 && res.statusCode < 400) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        });
-        req.on('error', () => resolve(false));
-        req.on('timeout', () => {
-          req.destroy();
-          resolve(false);
-        });
-      });
-      if (ok) return true;
-      await new Promise(r => setTimeout(r, 500));
-    }
-    throw new Error(`Health check failed on port ${port} path ${path}`);
-  }
 }
 
 module.exports = ServiceManager;
