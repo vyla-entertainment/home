@@ -291,12 +291,14 @@ async function build() {
   try {
     cloneAllRepos();
   } catch (error) {
+    console.error("Cloning failed:", error);
     process.exit(1);
   }
 
   for (const repo of REPOS) {
     const srcRepo = path.join(__dirname, repo);
     if (!fs.existsSync(srcRepo)) {
+      console.error(`Repository directory missing: ${srcRepo}`);
       process.exit(1);
     }
   }
@@ -304,6 +306,7 @@ async function build() {
   try {
     await installDependencies();
   } catch (error) {
+    console.error("Dependency installation failed:", error);
     process.exit(1);
   }
 
@@ -311,6 +314,7 @@ async function build() {
   try {
     encryptedCredentialsPath = encryptCredentialsFile();
   } catch (error) {
+    console.error("Credential encryption warning (non-fatal):", error);
   }
 
   cleanBuildDir();
@@ -389,4 +393,7 @@ async function build() {
 
 }
 
-build().catch(() => process.exit(1));
+build().catch((error) => {
+  console.error("Build process encountered an unhandled exception:", error);
+  process.exit(1);
+});
