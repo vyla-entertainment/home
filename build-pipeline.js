@@ -281,6 +281,7 @@ function validatePayload(zipPath) {
   fs.writeFileSync(path.join(__dirname, 'validation-report.json'), JSON.stringify(validationResults, null, 2), 'utf8');
 
   if (!validationResults.valid) {
+    console.error("Payload validation failed with errors:", validationResults.errors);
     process.exit(1);
   }
 
