@@ -2,11 +2,11 @@
   "frontend": [
     {
       "find": "https://player.vyla.cc",
-      "replace": "http://localhost:3000"
+      "replace": "http://localhost:3001"
     },
     {
       "find": "http://player.vyla.cc",
-      "replace": "http://localhost:3000"
+      "replace": "http://localhost:3001"
     },
     {
       "find": "https://api.vyla.cc",
@@ -17,12 +17,12 @@
       "replace": "http://localhost:5000"
     },
     {
-      "find": "https://api.vyla.cc",
-      "replace": "http://localhost:7860"
-    },
-    {
       "find": "https://streamed.pk/api",
       "replace": "http://localhost:5000"
+    },
+    {
+      "find": "https://auth.vyla.cc",
+      "replace": "http://localhost:3000"
     }
   ],
   "player": [
@@ -33,6 +33,20 @@
     {
       "find": "https://api.vyla.cc",
       "replace": "http://localhost:7860"
+    },
+    {
+      "find": "https://auth.vyla.cc",
+      "replace": "http://localhost:3000"
+    },
+    {
+      "find": "https://player.vyla.cc",
+      "replace": "http://localhost:4890"
+    }
+  ],
+  "auth-proxy": [
+    {
+      "find": "https://player.vyla.cc",
+      "replace": "http://localhost:3001"
     }
   ],
   "stream-api": [],

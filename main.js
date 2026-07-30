@@ -598,14 +598,16 @@ button:active {
 
     await serviceManager.startServices([
       { name: 'player', relativeDir: 'player' },
+      { name: 'auth-proxy', relativeDir: 'auth-proxy' },
       { name: 'stream-api', relativeDir: 'stream-api' },
       { name: 'live-api-streampk', relativeDir: 'live-api-streampk' }
     ]);
 
-    await serviceManager.waitForPorts([3000, 7860, 5000]);
+    await serviceManager.waitForPorts([3000, 3001, 7860, 5000]);
 
     const healthChecks = [
-      { port: 3000, name: 'player' },
+      { port: 3001, name: 'player' },
+      { port: 3000, name: 'auth-proxy' },
       { port: 7860, name: 'stream-api' },
       { port: 5000, name: 'live-api-streampk' }
     ];

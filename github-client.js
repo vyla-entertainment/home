@@ -6,7 +6,8 @@ const REPOS = {
     frontend: { branch: 'main' },
     player: { branch: 'main' },
     'stream-api': { branch: 'main' },
-    'live-api-streampk': { branch: 'main' }
+    'live-api-streampk': { branch: 'main' },
+    'auth-proxy': { branch: 'main' }
 };
 
 const GITHUB_ORG = 'vyla-entertainment';

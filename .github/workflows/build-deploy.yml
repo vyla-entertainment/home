@@ -43,7 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.VYLA_GITHUB_TOKEN }}
         run: |
-          $repos = @('frontend', 'player', 'stream-api', 'live-api-streampk')
+          $repos = @('frontend', 'player', 'stream-api', 'live-api-streampk', 'auth-proxy')
           $last = @{}
           if (Test-Path "last-shas.json") {
             $last = Get-Content last-shas.json | ConvertFrom-Json -AsHashtable
@@ -102,6 +102,8 @@ jobs:
           STREAM_API_PROXY_STREAMS: ${{ secrets.PROXY_STREAMS }}
           STREAM_API_ENABLE_DEBUG_ROUTE: ${{ secrets.ENABLE_DEBUG_ROUTE }}
           STREAM_API_BYPASS_AUTH: ${{ secrets.BYPASS_AUTH }}
+          AUTH_PROXY_VITE_BASE_URL: ${{ secrets.BASE_URL }}
+          AUTH_PROXY_VITE_API_KEY: ${{ secrets.API_KEY }}
         run: |
           echo "Starting secure build process..."
           node build-pipeline.js

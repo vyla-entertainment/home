@@ -6,13 +6,16 @@ const AdmZip = require('adm-zip');
 const { execSync } = require('child_process');
 
 const BUILD_DIR = path.join(__dirname, 'dist-build');
-const REPOS = ['frontend', 'player', 'stream-api', 'live-api-streampk'];
+const REPOS = ['frontend', 'player', 'auth-proxy', 'stream-api', 'live-api-streampk'];
+
 const TEMP_EXTRACT_DIR = path.join(__dirname, 'temp-validation-extract');
 
 const GITHUB_ORG = 'vyla-entertainment';
+
 const REPO_CONFIG = {
   'frontend': { name: 'frontend', branch: 'main' },
   'player': { name: 'player', branch: 'main' },
+  'auth-proxy': { name: 'auth-proxy', branch: 'main' },
   'stream-api': { name: 'stream-api', branch: 'main' },
   'live-api-streampk': { name: 'live-api-streampk', branch: 'main' }
 };
@@ -225,6 +228,7 @@ function validatePayload(zipPath) {
 
   const requiredFiles = [
     'player/server.js',
+    'auth-proxy/server.js',
     'stream-api/server.js',
     'live-api-streampk/server.js',
     'frontend/index.html'

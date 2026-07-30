@@ -72,6 +72,7 @@ class Patcher {
   verifyExtraction() {
     const requiredFiles = [
       'player/server.js',
+      'auth-proxy/server.js',
       'stream-api/server.js',
       'live-api-streampk/server.js',
       'frontend/index.html'
