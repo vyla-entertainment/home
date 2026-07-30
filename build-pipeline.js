@@ -62,12 +62,20 @@ function installOneRepo(repo) {
   if (!fs.existsSync(pkgJsonPath)) {
     return;
   }
+  const npmrcPath = path.join(repoDir, '.npmrc');
   try {
+    const token = getGitHubToken();
+    fs.writeFileSync(npmrcPath, `@vyla-entertainment:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${token}\n`);
+
     execSync('npm install --omit=dev', {
       cwd: repoDir,
       stdio: 'inherit'
     });
+  } finally {
+    if (fs.existsSync(npmrcPath)) fs.unlinkSync(npmrcPath);
+  }
 
+  try {
     const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
     const hasNativeDeps = pkg.dependencies && Object.keys(pkg.dependencies).some(dep =>
       ['bcrypt', 'sharp', 'sqlite3'].includes(dep)
@@ -101,7 +109,7 @@ function cleanBuildDir() {
   fs.mkdirSync(BUILD_DIR, { recursive: true });
 }
 
-function obfuscateFile(filePath) {
+function obfuscateFile(filePath, isEsm = false) {
   const content = fs.readFileSync(filePath, 'utf8');
   const result = JavaScriptObfuscator.obfuscate(content, {
     compact: true,
@@ -112,7 +120,8 @@ function obfuscateFile(filePath) {
     simplify: true,
     stringArray: true,
     stringArrayThreshold: 0.4,
-    stringArrayEncoding: []
+    stringArrayEncoding: [],
+    module: isEsm
   });
   fs.writeFileSync(filePath, result.getObfuscatedCode(), 'utf8');
 }
@@ -188,9 +197,19 @@ function collectJsFiles(src, dest, out) {
 function processFolder(src, dest) {
   const jsFiles = [];
   collectJsFiles(src, dest, jsFiles);
+
+  let isEsm = false;
+  const pkgPath = path.join(src, 'package.json');
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      if (pkg.type === 'module') isEsm = true;
+    } catch (e) {}
+  }
+
   for (const filePath of jsFiles) {
     try {
-      obfuscateFile(filePath);
+      obfuscateFile(filePath, isEsm);
     } catch (e) {
     }
   }

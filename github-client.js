@@ -88,11 +88,21 @@ class GitHubClient {
 
         if (onLog) onLog(`Installing dependencies for ${repoName}...`);
 
+        const token = this.getToken();
+        const npmrcPath = path.join(repoDir, '.npmrc');
+        if (token) {
+            fs.writeFileSync(npmrcPath, `@vyla-entertainment:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${token}\n`);
+        }
+
         const result = spawnSync('npm', ['install', '--omit=dev'], {
             cwd: repoDir,
             stdio: 'pipe',
             shell: process.platform === 'win32'
         });
+
+        if (fs.existsSync(npmrcPath)) {
+            fs.unlinkSync(npmrcPath);
+        }
 
         if (result.status !== 0) {
             const stderr = result.stderr ? result.stderr.toString() : 'unknown error';

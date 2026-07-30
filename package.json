@@ -34,6 +34,7 @@
       "crypto-utils.js",
       "credential-manager.js",
       "update-client.js",
+      "github-client.js",
       "config/**/*",
       "build/icon.ico",
       "build/logo.txt",
