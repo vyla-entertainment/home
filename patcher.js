@@ -71,13 +71,13 @@ class Patcher {
 
   verifyExtraction() {
     const requiredFiles = [
-      'player/server.js',
+      'player/index.html',
       'auth-proxy/server.js',
       'stream-api/server.js',
       'live-api-streampk/server.js',
       'frontend/index.html'
     ];
-    
+
     for (const file of requiredFiles) {
       const fullPath = path.join(this.appDataPath, file);
       if (!fs.existsSync(fullPath)) {

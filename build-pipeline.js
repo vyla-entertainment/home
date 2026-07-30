@@ -227,7 +227,7 @@ function validatePayload(zipPath) {
   zip.extractAllTo(TEMP_EXTRACT_DIR, true);
 
   const requiredFiles = [
-    'player/server.js',
+    'player/index.html',
     'auth-proxy/server.js',
     'stream-api/server.js',
     'live-api-streampk/server.js',

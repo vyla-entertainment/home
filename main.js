@@ -10,6 +10,8 @@ let mainWindow;
 let serviceManager;
 let expressApp;
 let expressServer;
+let playerExpressApp;
+let playerExpressServer;
 
 const gotLock = app.requestSingleInstanceLock();
 
@@ -597,11 +599,18 @@ button:active {
     serviceManager.credentialManager.loadCredentials();
 
     await serviceManager.startServices([
-      { name: 'player', relativeDir: 'player' },
       { name: 'auth-proxy', relativeDir: 'auth-proxy' },
       { name: 'stream-api', relativeDir: 'stream-api' },
       { name: 'live-api-streampk', relativeDir: 'live-api-streampk' }
     ]);
+
+    const playerDir = path.join(APPDATA_DIR, 'player');
+    playerExpressApp = express();
+    playerExpressApp.use(express.static(playerDir, { maxAge: '1d', etag: true }));
+    playerExpressApp.get('*', (req, res) => {
+      res.sendFile(path.join(playerDir, 'index.html'));
+    });
+    playerExpressServer = playerExpressApp.listen(3001);
 
     await serviceManager.waitForPorts([3000, 3001, 7860, 5000]);
 
@@ -645,6 +654,7 @@ if (gotLock) {
 
 app.on('window-all-closed', async () => {
   if (expressServer) expressServer.close();
+  if (playerExpressServer) playerExpressServer.close();
   if (serviceManager) {
     await serviceManager.stopAll();
   }
