@@ -77,6 +77,7 @@ class Patcher {
       'live-api-streampk/server.js',
       'frontend/index.html'
     ];
+    
     for (const file of requiredFiles) {
       const fullPath = path.join(this.appDataPath, file);
       if (!fs.existsSync(fullPath)) {

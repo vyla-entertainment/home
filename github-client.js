@@ -176,4 +176,4 @@ class GitHubClient {
     }
 }
 
-module.exports = GitHubClient;
+module.exports = GitHubClient
