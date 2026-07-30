@@ -1,7 +1,8 @@
 {
-  "player": "1bd61d1656ae9a61d69f43981f24e21f0bec05e4",
+  "player": "5fb12c4b2ca53d9852c6b762443c4ef1eb526afb",
+  "live-api-streampk": "6f2f3932360624b473c55becb7a5354b9a0fa804",
   "frontend": "7eab622264b7f7a738e24c45d69bfcec248b7562",
   "stream-api": "e20574faec06950c34667854f635f49fc2c1b779",
   "live-api-streampk": "6f2f3932360624b473c55becb7a5354b9a0fa804",
-  "auth-proxy": "main"
+  "auth-proxy": "959e0d083cf866b80e4b02fbd15b3fbf9c198ebd"
 }
