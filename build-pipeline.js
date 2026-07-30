@@ -15,7 +15,7 @@ const GITHUB_ORG = 'vyla-entertainment';
 const REPO_CONFIG = {
   'frontend': { name: 'frontend', branch: 'main' },
   'player': { name: 'player', branch: 'main' },
-  'auth-proxy': { name: 'auth-proxy', branch: 'main' },
+  'auth-proxy': { name: 'auth-proxy', branch: 'master' },
   'stream-api': { name: 'stream-api', branch: 'main' },
   'live-api-streampk': { name: 'live-api-streampk', branch: 'main' }
 };

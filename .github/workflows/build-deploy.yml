@@ -53,20 +53,25 @@ jobs:
           $changed = $false
 
           foreach ($repo in $repos) {
-            $uri = "https://api.github.com/repos/vyla-entertainment/$repo/commits/main"
             $headers = @{
               Authorization = "Bearer $env:GITHUB_TOKEN"
               Accept        = "application/vnd.github+json"
             }
+            
+            $repoUri = "https://api.github.com/repos/vyla-entertainment/$repo"
+            $repoInfo = Invoke-RestMethod -Uri $repoUri -Headers $headers
+            $defaultBranch = $repoInfo.default_branch
+
+            $uri = "https://api.github.com/repos/vyla-entertainment/$repo/commits/$defaultBranch"
             $resp = Invoke-RestMethod -Uri $uri -Headers $headers
             $sha = $resp.sha
             $current[$repo] = $sha
 
             if (-not $last.ContainsKey($repo) -or $last[$repo] -ne $sha) {
-              Write-Host "Change detected in $repo : $sha"
+              Write-Host "Change detected in $repo ($defaultBranch): $sha"
               $changed = $true
             } else {
-              Write-Host "No change in $repo"
+              Write-Host "No change in $repo ($defaultBranch)"
             }
           }
 
