@@ -62,20 +62,12 @@ function installOneRepo(repo) {
   if (!fs.existsSync(pkgJsonPath)) {
     return;
   }
-  const npmrcPath = path.join(repoDir, '.npmrc');
   try {
-    const token = getGitHubToken();
-    fs.writeFileSync(npmrcPath, `@vyla-entertainment:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${token}\n`);
-
     execSync('npm install --omit=dev', {
       cwd: repoDir,
       stdio: 'inherit'
     });
-  } finally {
-    if (fs.existsSync(npmrcPath)) fs.unlinkSync(npmrcPath);
-  }
 
-  try {
     const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
     const hasNativeDeps = pkg.dependencies && Object.keys(pkg.dependencies).some(dep =>
       ['bcrypt', 'sharp', 'sqlite3'].includes(dep)
@@ -204,7 +196,7 @@ function processFolder(src, dest) {
     try {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
       if (pkg.type === 'module') isEsm = true;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   for (const filePath of jsFiles) {
