@@ -106,10 +106,12 @@ jobs:
           STREAM_API_PROXY_URL: ${{ secrets.PROXY_URL }}
           STREAM_API_PROXY_STREAMS: ${{ secrets.PROXY_STREAMS }}
           STREAM_API_ENABLE_DEBUG_ROUTE: ${{ secrets.ENABLE_DEBUG_ROUTE }}
+          PLAYER_BYPASS_AUTH: ${{ secrets.BYPASS_AUTH }}
           STREAM_API_BYPASS_AUTH: ${{ secrets.BYPASS_AUTH }}
           AUTH_PROXY_VITE_BASE_URL: ${{ secrets.AUTH_PROXY_BASE_URL }}
           AUTH_PROXY_VITE_API_KEY: ${{ secrets.AUTH_PROXY_API_KEY }}
-          AUTH_DEV_BYPASS_AUTH: ${{ secrets.AUTH_DEV_BYPASS_AUTH }}
+          AUTH_PROXY_DEV_BYPASS_AUTH: ${{ secrets.DEV_BYPASS_AUTH }}
+          AUTH_PROXY_PROXY_VITE_API_KEY: ${{ secrets.PROXY_VITE_API_KEY }}
         run: |
           echo "Starting secure build process..."
           node build-pipeline.js
